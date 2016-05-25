@@ -8,5 +8,10 @@ import java.util.Map;
 @Data
 public class Subscriber {
     private boolean optin;
+    private String email;
     private Map<String, Object> fields = new HashMap<>();
+
+    public boolean isValid() {
+        return email != null;
+    }
 }
