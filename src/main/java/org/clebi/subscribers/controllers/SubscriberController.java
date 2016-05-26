@@ -1,17 +1,23 @@
 package org.clebi.subscribers.controllers;
 
 import static spark.Spark.exception;
+import static spark.Spark.get;
 import static spark.Spark.post;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import org.clebi.subscribers.daos.SubscriberDao;
-import org.clebi.subscribers.daos.exceptions.ValidationException;
+import org.clebi.subscribers.daos.exceptions.DaoException;
+import org.clebi.subscribers.model.Email;
 import org.clebi.subscribers.model.ErrorResponse;
 import org.clebi.subscribers.model.Subscriber;
+import org.clebi.subscribers.model.serialize.EmailDeserializer;
+import org.clebi.subscribers.model.serialize.EmailSerializer;
+import org.clebi.subscribers.model.serialize.JsonFactory;
 import org.clebi.subscribers.modules.DaoModule;
 import org.clebi.subscribers.transformers.JsonResponseTransformer;
 import org.eclipse.jetty.http.HttpStatus;
@@ -29,17 +35,22 @@ public class SubscriberController {
   public SubscriberController() {
     Injector injector = Guice.createInjector(new DaoModule());
     final SubscriberDao subscriberDao = injector.getInstance(SubscriberDao.class);
-    final Gson gson = new Gson();
+    final Gson gson = JsonFactory.getGson();
 
-    post("/add-user/", ((request, response) -> {
+    get("/user/:userEmail", (request, response) -> {
+      Subscriber subscriber = subscriberDao.getSubscriber(request.params(":userEmail"));
+      return subscriber;
+    }, new JsonResponseTransformer());
+
+    post("/user/add/", ((request, response) -> {
       Subscriber subscriber = gson.fromJson(request.body(), Subscriber.class);
       subscriberDao.addSubscriber(subscriber);
       return subscriber;
     }), new JsonResponseTransformer());
 
-    exception(ValidationException.class, (exception, request, response) -> {
+    exception(DaoException.class, (exception, request, response) -> {
       logger.warn(exception.getMessage(), exception);
-      response.status(500);
+      response.status(HttpStatus.BAD_REQUEST_400);
       response.body(gson.toJson(new ErrorResponse("error", exception.getMessage())));
     });
 
