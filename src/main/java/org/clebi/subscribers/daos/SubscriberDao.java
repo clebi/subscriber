@@ -5,6 +5,6 @@ import org.clebi.subscribers.model.Subscriber;
 
 public interface SubscriberDao {
 
-    void addSubscriber(Subscriber subscriber) throws ValidationException;
+  void addSubscriber(Subscriber subscriber) throws ValidationException;
 
 }

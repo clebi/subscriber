@@ -7,12 +7,19 @@ group 'org.clebi'
 version '0.0.1-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'checkstyle'
 
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 
 repositories {
     mavenCentral()
+}
+
+checkstyle {
+    configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
+    toolVersion = '6.18'
 }
 
 dependencies {
@@ -23,5 +30,6 @@ dependencies {
     compile "org.elasticsearch:elasticsearch:2.3.+"
     compile "com.google.inject:guice:4.+"
     compile "com.google.inject.extensions:guice-throwingproviders:4.+"
+    compile "org.yaml:snakeyaml:1.+"
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }

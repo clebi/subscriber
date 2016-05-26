@@ -8,7 +8,7 @@ import lombok.Data;
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
 public class ErrorResponse {
 
-    private String status;
-    private String message;
+  private String status;
+  private String message;
 
 }
