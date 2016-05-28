@@ -2,6 +2,8 @@ package org.clebi.subscribers.model;
 
 import lombok.Data;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,6 +11,7 @@ import java.util.Map;
 public class Subscriber {
   private boolean optin;
   private Email email;
+  private ZonedDateTime dateSubscriber = ZonedDateTime.now(ZoneOffset.UTC);
   private Map<String, Object> fields = new HashMap<>();
 
   public boolean isValid() {

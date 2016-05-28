@@ -5,10 +5,12 @@ import com.google.gson.GsonBuilder;
 
 import org.clebi.subscribers.model.Email;
 
+import java.time.ZonedDateTime;
+
 public class JsonFactory {
 
   /**
-   * Get gson instance
+   * Get gson instance.
    *
    * @return gson instance
    */
@@ -16,6 +18,8 @@ public class JsonFactory {
     return new GsonBuilder()
         .registerTypeAdapter(Email.class, new EmailDeserializer())
         .registerTypeAdapter(Email.class, new EmailSerializer())
+        .registerTypeAdapter(ZonedDateTime.class, new ZoneDateTimeDeserializer())
+        .registerTypeAdapter(ZonedDateTime.class, new ZoneDateTimeSerializer())
         .create();
   }
 

@@ -11,7 +11,8 @@ import java.lang.reflect.Type;
 
 public class EmailDeserializer implements JsonDeserializer<Email> {
   @Override
-  public Email deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+  public Email deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+      throws JsonParseException {
     return new Email(json.getAsString());
   }
 }

@@ -5,18 +5,14 @@ import static spark.Spark.get;
 import static spark.Spark.post;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import org.clebi.subscribers.daos.SubscriberDao;
 import org.clebi.subscribers.daos.exceptions.DaoException;
-import org.clebi.subscribers.model.Email;
 import org.clebi.subscribers.model.ErrorResponse;
 import org.clebi.subscribers.model.Subscriber;
-import org.clebi.subscribers.model.serialize.EmailDeserializer;
-import org.clebi.subscribers.model.serialize.EmailSerializer;
 import org.clebi.subscribers.model.serialize.JsonFactory;
 import org.clebi.subscribers.modules.DaoModule;
 import org.clebi.subscribers.transformers.JsonResponseTransformer;
@@ -44,6 +40,7 @@ public class SubscriberController {
 
     post("/user/add/", ((request, response) -> {
       Subscriber subscriber = gson.fromJson(request.body(), Subscriber.class);
+      System.out.println(subscriber);
       subscriberDao.addSubscriber(subscriber);
       return subscriber;
     }), new JsonResponseTransformer());
