@@ -7,6 +7,7 @@ import org.clebi.subscribers.model.Email;
 import org.clebi.subscribers.model.Subscriber;
 import org.clebi.subscribers.model.serialize.JsonFactory;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
@@ -56,7 +57,7 @@ public class SubscriberDaoTest {
   public void testGetUser() throws Exception {
     Map<String, Object> fields = new HashMap<>();
     fields.put("field1", "test");
-    fields.put("field2", 12);
+    fields.put("field2", 12.0);
     Subscriber subscriber = new Subscriber(
         true,
         new Email(TEST_EMAIL),
@@ -69,11 +70,39 @@ public class SubscriberDaoTest {
         .get();
     SubscriberDao dao = new SubscriberDaoImpl(() -> node.client());
     Subscriber getSubscriber = dao.getSubscriber(subscriber.getEmail().toString());
+    assertSubscriber(subscriber, getSubscriber);
+  }
+
+  @Test
+  public void testAddUser() throws Exception {
+    Map<String, Object> fields = new HashMap<>();
+    fields.put("field1", "test");
+    fields.put("field2", 12.0);
+    Subscriber subscriber = new Subscriber(
+        true,
+        new Email(TEST_EMAIL),
+        ZonedDateTime.now(ZoneOffset.UTC),
+        fields);
+    SubscriberDao dao = new SubscriberDaoImpl(() -> node.client());
+    dao.addSubscriber(subscriber);
+    GetResponse resp = node.client()
+        .prepareGet(SubscriberDaoImpl.INDEX_NAME, SubscriberDaoImpl.DOCUMENT_NAME, TEST_EMAIL)
+        .get();
+    Subscriber getSubscriber = JsonFactory.getGson().fromJson(
+        resp.getSourceAsString(),
+        Subscriber.class);
+    assertSubscriber(subscriber, getSubscriber);
+  }
+
+  private void assertSubscriber(
+      Subscriber expected,
+      Subscriber actual) {
     Collection<String> excludes = new ArrayList<String>();
     excludes.add(EXCLUDE_FROM_EQUALS);
-    Assert.assertTrue(EqualsBuilder.reflectionEquals(subscriber, getSubscriber, excludes));
-    for (Map.Entry<String, Object> entry : fields.entrySet()) {
-      Assert.assertEquals(entry.getValue(), subscriber.getFields().get(entry.getKey()));
+    Assert.assertTrue(EqualsBuilder.reflectionEquals(expected, actual, excludes));
+    Assert.assertEquals(expected.getFields().size(), actual.getFields().size());
+    for (Map.Entry<String, Object> entry : expected.getFields().entrySet()) {
+      Assert.assertEquals(entry.getValue(), actual.getFields().get(entry.getKey()));
     }
   }
 
