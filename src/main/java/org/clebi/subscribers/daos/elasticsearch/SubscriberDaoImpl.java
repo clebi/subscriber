@@ -14,6 +14,9 @@ import org.elasticsearch.client.Client;
 
 public class SubscriberDaoImpl implements SubscriberDao {
 
+  public static final String INDEX_NAME = "subscribers";
+  public static final String DOCUMENT_NAME = "subscriber";
+
   private static final String ERROR_GET_NOT_FOUND = "unable to find subscriber with email: %s";
 
   private final Client client;
@@ -29,7 +32,7 @@ public class SubscriberDaoImpl implements SubscriberDao {
     if (!subscriber.isValid()) {
       throw new ValidationException("unable to validate subscriber model");
     }
-    client.prepareIndex("subscribers", "subscriber")
+    client.prepareIndex(INDEX_NAME, DOCUMENT_NAME)
         .setSource(gson.toJson(subscriber))
         .setId(subscriber.getEmail().toString())
         .get();

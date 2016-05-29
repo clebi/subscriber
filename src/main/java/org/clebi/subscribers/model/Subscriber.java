@@ -1,5 +1,7 @@
 package org.clebi.subscribers.model;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.ZoneOffset;
@@ -8,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Data
+@AllArgsConstructor(access = AccessLevel.PUBLIC)
 public class Subscriber {
   private boolean optin;
   private Email email;
