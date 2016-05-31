@@ -40,7 +40,6 @@ public class SubscriberController {
 
     post("/user/add/", ((request, response) -> {
       Subscriber subscriber = gson.fromJson(request.body(), Subscriber.class);
-      System.out.println(subscriber);
       subscriberDao.addSubscriber(subscriber);
       return subscriber;
     }), new JsonResponseTransformer());
