@@ -45,6 +45,17 @@ public class SubscriberController {
       return subscriber;
     }), new JsonResponseTransformer());
 
+    get("/user/search/optins", ((request, response) -> {
+      int size = Integer.parseInt(request.queryParams("size"));
+      int offset = Integer.parseInt(request.queryParams("offset"));
+      return subscriberDao.listOptins(size, offset);
+    }), new JsonResponseTransformer());
+
+    exception(NumberFormatException.class, (exception, request, response) -> {
+      response.status(HttpStatus.BAD_REQUEST_400);
+      response.body(gson.toJson(new ErrorResponse("error", "bad parameters")));
+    });
+
     exception(DaoException.class, (exception, request, response) -> {
       logger.warn(exception.getMessage(), exception);
       response.status(HttpStatus.BAD_REQUEST_400);

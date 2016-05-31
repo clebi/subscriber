@@ -4,6 +4,9 @@ import org.clebi.subscribers.daos.exceptions.NotFoundException;
 import org.clebi.subscribers.daos.exceptions.ValidationException;
 import org.clebi.subscribers.model.Subscriber;
 
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 public interface SubscriberDao {
 
   /**
@@ -21,5 +24,7 @@ public interface SubscriberDao {
    * @return the subscriber
    */
   Subscriber getSubscriber(String email) throws NotFoundException;
+
+  List<Subscriber> listOptins(int size, int offset) throws ExecutionException, InterruptedException;
 
 }

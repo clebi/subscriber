@@ -10,7 +10,16 @@ import org.clebi.subscribers.model.Subscriber;
 import org.clebi.subscribers.model.serialize.JsonFactory;
 import org.clebi.subscribers.providers.EsCheckedProvider;
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class SubscriberDaoImpl implements SubscriberDao {
 
@@ -46,5 +55,22 @@ public class SubscriberDaoImpl implements SubscriberDao {
       throw new NotFoundException(String.format(ERROR_GET_NOT_FOUND, email));
     }
     return subscriber;
+  }
+
+  @Override
+  public List<Subscriber> listOptins(int size, int offset) throws ExecutionException, InterruptedException {
+    SearchResponse resp = client.prepareSearch(INDEX_NAME)
+        .setTypes(DOCUMENT_NAME)
+        .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
+        .setQuery(QueryBuilders.termQuery("optin", true))
+        .setFrom(offset)
+        .setSize(size)
+        .execute()
+        .actionGet();
+    List<Subscriber> subscribers = new LinkedList<>();
+    for (SearchHit hit: resp.getHits()) {
+      subscribers.add(gson.fromJson(hit.getSourceAsString(), Subscriber.class));
+    }
+    return subscribers;
   }
 }
