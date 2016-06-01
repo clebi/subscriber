@@ -7,6 +7,7 @@ import org.clebi.subscribers.model.Email;
 import org.clebi.subscribers.model.Subscriber;
 import org.clebi.subscribers.model.serialize.JsonFactory;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
@@ -23,6 +24,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SubscriberDaoIntegTest {
@@ -55,19 +57,13 @@ public class SubscriberDaoIntegTest {
 
   @Test
   public void testGetUser() throws Exception {
-    Map<String, Object> fields = new HashMap<>();
-    fields.put("field1", "test");
-    fields.put("field2", 12.0);
+    Map<String, Object> fields = generateTestFields();
     Subscriber subscriber = new Subscriber(
         true,
         new Email(TEST_EMAIL),
         ZonedDateTime.now(ZoneOffset.UTC),
         fields);
-    node.client()
-        .prepareIndex(SubscriberDaoImpl.INDEX_NAME, SubscriberDaoImpl.DOCUMENT_NAME)
-        .setId(subscriber.getEmail().toString())
-        .setSource(JsonFactory.getGson().toJson(subscriber))
-        .get();
+    indexSubsciber(subscriber);
     SubscriberDao dao = new SubscriberDaoImpl(() -> node.client());
     Subscriber getSubscriber = dao.getSubscriber(subscriber.getEmail().toString());
     assertSubscriber(subscriber, getSubscriber);
@@ -75,9 +71,7 @@ public class SubscriberDaoIntegTest {
 
   @Test
   public void testAddUser() throws Exception {
-    Map<String, Object> fields = new HashMap<>();
-    fields.put("field1", "test");
-    fields.put("field2", 12.0);
+    Map<String, Object> fields = generateTestFields();
     Subscriber subscriber = new Subscriber(
         true,
         new Email(TEST_EMAIL),
@@ -92,6 +86,63 @@ public class SubscriberDaoIntegTest {
         resp.getSourceAsString(),
         Subscriber.class);
     assertSubscriber(subscriber, getSubscriber);
+  }
+
+  @Test
+  public void testListOptins() throws Exception {
+    final Map<String, Subscriber> subscribers = new HashMap<>();
+    final String emailOptin1 = "test_optin_1@test.com";
+    final String emailOptin2 = "test_optin_2@test.com";
+    final String emailNonOptin = "test_non_optin_1@test.com";
+    subscribers.put(
+        emailOptin1,
+        new Subscriber(
+            true,
+            new Email(emailOptin1),
+            ZonedDateTime.now(ZoneOffset.UTC),
+            generateTestFields()));
+    subscribers.put(
+        emailOptin2,
+        new Subscriber(
+            true,
+            new Email(emailOptin2),
+            ZonedDateTime.now(ZoneOffset.UTC),
+            generateTestFields()));
+    subscribers.put(
+        emailNonOptin,
+        new Subscriber(
+            false,
+            new Email(emailNonOptin),
+            ZonedDateTime.now(ZoneOffset.UTC),
+            generateTestFields()));
+    for (Map.Entry<String, Subscriber> entry : subscribers.entrySet()) {
+      indexSubsciber(entry.getValue());
+    }
+    final SubscriberDao dao = new SubscriberDaoImpl(() -> node.client());
+    node.client().admin().indices()
+        .refresh(new RefreshRequest(SubscriberDaoImpl.INDEX_NAME))
+        .actionGet();
+    final List<Subscriber> listSubscribers = dao.listOptins(5, 0);
+    Assert.assertEquals(2, listSubscribers.size());
+    for (Subscriber subscriber : listSubscribers) {
+      Subscriber expectedSubscriber = subscribers.get(subscriber.getEmail().toString());
+      assertSubscriber(expectedSubscriber, subscriber);
+    }
+  }
+
+  private void indexSubsciber(Subscriber subscriber) {
+    node.client()
+        .prepareIndex(SubscriberDaoImpl.INDEX_NAME, SubscriberDaoImpl.DOCUMENT_NAME)
+        .setId(subscriber.getEmail().toString())
+        .setSource(JsonFactory.getGson().toJson(subscriber))
+        .get();
+  }
+
+  private Map<String, Object> generateTestFields() {
+    Map<String, Object> fields = new HashMap<>();
+    fields.put("field1", "test");
+    fields.put("field2", 12.0);
+    return fields;
   }
 
   private void assertSubscriber(
