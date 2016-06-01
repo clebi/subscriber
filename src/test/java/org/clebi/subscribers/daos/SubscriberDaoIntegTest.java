@@ -64,6 +64,7 @@ public class SubscriberDaoIntegTest {
         ZonedDateTime.now(ZoneOffset.UTC),
         fields);
     indexSubsciber(subscriber);
+    refreshIndices();
     SubscriberDao dao = new SubscriberDaoImpl(() -> node.client());
     Subscriber getSubscriber = dao.getSubscriber(subscriber.getEmail().toString());
     assertSubscriber(subscriber, getSubscriber);
@@ -79,6 +80,7 @@ public class SubscriberDaoIntegTest {
         fields);
     SubscriberDao dao = new SubscriberDaoImpl(() -> node.client());
     dao.addSubscriber(subscriber);
+    refreshIndices();
     GetResponse resp = node.client()
         .prepareGet(SubscriberDaoImpl.INDEX_NAME, SubscriberDaoImpl.DOCUMENT_NAME, TEST_EMAIL)
         .get();
@@ -119,15 +121,19 @@ public class SubscriberDaoIntegTest {
       indexSubsciber(entry.getValue());
     }
     final SubscriberDao dao = new SubscriberDaoImpl(() -> node.client());
-    node.client().admin().indices()
-        .refresh(new RefreshRequest(SubscriberDaoImpl.INDEX_NAME))
-        .actionGet();
+    refreshIndices();
     final List<Subscriber> listSubscribers = dao.listOptins(5, 0);
     Assert.assertEquals(2, listSubscribers.size());
     for (Subscriber subscriber : listSubscribers) {
       Subscriber expectedSubscriber = subscribers.get(subscriber.getEmail().toString());
       assertSubscriber(expectedSubscriber, subscriber);
     }
+  }
+
+  private void refreshIndices() {
+    node.client().admin().indices()
+        .refresh(new RefreshRequest(SubscriberDaoImpl.INDEX_NAME))
+        .actionGet();
   }
 
   private void indexSubsciber(Subscriber subscriber) {
