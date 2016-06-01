@@ -5,16 +5,13 @@ import static spark.Spark.get;
 import static spark.Spark.post;
 
 import com.google.gson.Gson;
-import com.google.inject.Guice;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 import org.clebi.subscribers.daos.SubscriberDao;
 import org.clebi.subscribers.daos.exceptions.DaoException;
 import org.clebi.subscribers.model.ErrorResponse;
 import org.clebi.subscribers.model.Subscriber;
 import org.clebi.subscribers.model.serialize.JsonFactory;
-import org.clebi.subscribers.modules.DaoModule;
 import org.clebi.subscribers.transformers.JsonResponseTransformer;
 import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
@@ -24,13 +21,14 @@ public class SubscriberController {
 
   private static final Logger logger = LoggerFactory.getLogger(SubscriberController.class);
 
+  private SubscriberDao subscriberDao;
+
   /**
    * Initialize subscriber controller.
    */
   @Inject
-  public SubscriberController() {
-    Injector injector = Guice.createInjector(new DaoModule());
-    final SubscriberDao subscriberDao = injector.getInstance(SubscriberDao.class);
+  public SubscriberController(SubscriberDao subscriberDao) {
+    this.subscriberDao = subscriberDao;
     final Gson gson = JsonFactory.getGson();
 
     get("/user/:userEmail", (request, response) -> {
