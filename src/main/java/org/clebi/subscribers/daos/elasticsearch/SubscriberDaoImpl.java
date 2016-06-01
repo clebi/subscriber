@@ -16,7 +16,6 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -68,7 +67,7 @@ public class SubscriberDaoImpl implements SubscriberDao {
         .execute()
         .actionGet();
     List<Subscriber> subscribers = new LinkedList<>();
-    for (SearchHit hit: resp.getHits()) {
+    for (SearchHit hit : resp.getHits()) {
       subscribers.add(gson.fromJson(hit.getSourceAsString(), Subscriber.class));
     }
     return subscribers;
