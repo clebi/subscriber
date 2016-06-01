@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SubscriberDaoTest {
+public class SubscriberDaoIntegTest {
 
   private static final String ES_DATA_PATH = "build/esdata";
   private static final String TEST_EMAIL = "test@test.com";
