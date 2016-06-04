@@ -17,6 +17,8 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 public class SubscriberController {
 
   private static final Logger logger = LoggerFactory.getLogger(SubscriberController.class);
@@ -41,6 +43,12 @@ public class SubscriberController {
       subscriberDao.addSubscriber(subscriber);
       return subscriber;
     }), new JsonResponseTransformer());
+
+    get("/user/list/", ((request, response) -> {
+      int size = Integer.parseInt(request.queryParams("size"));
+      int offset = Integer.parseInt(request.queryParams("offset"));
+      return subscriberDao.list(size, offset);
+    }));
 
     get("/user/search/optins", ((request, response) -> {
       int size = Integer.parseInt(request.queryParams("size"));

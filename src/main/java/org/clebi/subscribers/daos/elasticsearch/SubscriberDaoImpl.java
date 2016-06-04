@@ -57,6 +57,22 @@ public class SubscriberDaoImpl implements SubscriberDao {
   }
 
   @Override
+  public List<Subscriber> list(int size, int from) {
+    SearchResponse resp = client.prepareSearch(INDEX_NAME)
+        .setTypes(DOCUMENT_NAME)
+        .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
+        .setFrom(from)
+        .setSize(size)
+        .execute()
+        .actionGet();
+    List<Subscriber> subscribers = new LinkedList<>();
+    for (SearchHit hit : resp.getHits()) {
+      subscribers.add(gson.fromJson(hit.getSourceAsString(), Subscriber.class));
+    }
+    return subscribers;
+  }
+
+  @Override
   public List<Subscriber> listOptins(int size, int offset) throws ExecutionException, InterruptedException {
     SearchResponse resp = client.prepareSearch(INDEX_NAME)
         .setTypes(DOCUMENT_NAME)

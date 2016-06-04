@@ -26,6 +26,15 @@ public interface SubscriberDao {
   Subscriber getSubscriber(String email) throws NotFoundException;
 
   /**
+   * Get the list of all subscribers.
+   * @param size number of search results to get
+   * @param offset from where to get the subscribers
+   * @return the list of subscribers
+   * @throws Exception an error happened during query
+   */
+  List<Subscriber> list(int size, int offset) throws Exception;
+
+  /**
    * List all optins subscribers.
    * @param size number of search results to get
    * @param offset from where to get subscribers
