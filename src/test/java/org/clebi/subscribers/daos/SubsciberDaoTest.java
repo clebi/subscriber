@@ -18,6 +18,7 @@ public class SubsciberDaoTest {
     dao.addSubscriber(
         new Subscriber(
             true,
+            true,
             new Email("bad_email"),
             ZonedDateTime.now(ZoneOffset.UTC),
             new HashMap<String, Object>()

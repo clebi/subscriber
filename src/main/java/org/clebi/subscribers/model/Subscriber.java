@@ -13,6 +13,7 @@ import java.util.Map;
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
 public class Subscriber {
   private boolean optin;
+  private boolean active;
   private Email email;
   private ZonedDateTime dateSubscriber = ZonedDateTime.now(ZoneOffset.UTC);
   private Map<String, Object> fields = new HashMap<>();

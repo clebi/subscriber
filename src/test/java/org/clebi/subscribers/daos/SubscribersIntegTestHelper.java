@@ -65,6 +65,7 @@ public class SubscribersIntegTestHelper {
         emailOptin1,
         new Subscriber(
             true,
+            true,
             new Email(emailOptin1),
             ZonedDateTime.now(ZoneOffset.UTC),
             generateTestFields()));
@@ -72,6 +73,7 @@ public class SubscribersIntegTestHelper {
         emailOptin2,
         new Subscriber(
             true,
+            false,
             new Email(emailOptin2),
             ZonedDateTime.now(ZoneOffset.UTC),
             generateTestFields()));
@@ -79,6 +81,7 @@ public class SubscribersIntegTestHelper {
         emailNonOptin,
         new Subscriber(
             false,
+            true,
             new Email(emailNonOptin),
             ZonedDateTime.now(ZoneOffset.UTC),
             generateTestFields()));

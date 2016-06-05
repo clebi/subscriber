@@ -22,6 +22,7 @@ public class SubscriberDaoIntegTest extends SubscribersIntegTestHelper {
     Map<String, Object> fields = generateTestFields();
     Subscriber subscriber = new Subscriber(
         true,
+        true,
         new Email(TEST_EMAIL),
         ZonedDateTime.now(ZoneOffset.UTC),
         fields);
@@ -36,6 +37,7 @@ public class SubscriberDaoIntegTest extends SubscribersIntegTestHelper {
   public void testAddUser() throws Exception {
     Map<String, Object> fields = generateTestFields();
     Subscriber subscriber = new Subscriber(
+        true,
         true,
         new Email(TEST_EMAIL),
         ZonedDateTime.now(ZoneOffset.UTC),
