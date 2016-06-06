@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import org.clebi.subscribers.daos.SubscriberDao;
 import org.clebi.subscribers.daos.exceptions.NotFoundException;
 import org.clebi.subscribers.daos.exceptions.ValidationException;
+import org.clebi.subscribers.model.SearchFilter;
 import org.clebi.subscribers.model.Subscriber;
 import org.clebi.subscribers.model.serialize.JsonFactory;
 import org.clebi.subscribers.providers.EsCheckedProvider;
@@ -13,12 +14,12 @@ import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class SubscriberDaoImpl implements SubscriberDao {
 
@@ -40,6 +41,7 @@ public class SubscriberDaoImpl implements SubscriberDao {
     if (!subscriber.isValid()) {
       throw new ValidationException("unable to validate subscriber model");
     }
+    System.out.println(gson.toJson(subscriber));
     client.prepareIndex(INDEX_NAME, DOCUMENT_NAME)
         .setSource(gson.toJson(subscriber))
         .setId(subscriber.getEmail().toString())
@@ -57,33 +59,24 @@ public class SubscriberDaoImpl implements SubscriberDao {
   }
 
   @Override
-  public List<Subscriber> list(int size, int from) {
+  public List<Subscriber> search(int size, int offset, List<SearchFilter> filters) {
+    BoolQueryBuilder builder = new BoolQueryBuilder();
+    for (SearchFilter filter : filters) {
+      System.out.println(filter);
+      builder.must(QueryBuilders.termQuery(filter.getFieldName(), filter.getValues().get(0)));
+    }
     SearchResponse resp = client.prepareSearch(INDEX_NAME)
         .setTypes(DOCUMENT_NAME)
         .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-        .setFrom(from)
-        .setSize(size)
+        .setQuery(builder)
         .execute()
         .actionGet();
-    List<Subscriber> subscribers = new LinkedList<>();
-    for (SearchHit hit : resp.getHits()) {
-      subscribers.add(gson.fromJson(hit.getSourceAsString(), Subscriber.class));
-    }
-    return subscribers;
+    return parseSearchResponse(resp);
   }
 
-  @Override
-  public List<Subscriber> listOptins(int size, int offset) throws ExecutionException, InterruptedException {
-    SearchResponse resp = client.prepareSearch(INDEX_NAME)
-        .setTypes(DOCUMENT_NAME)
-        .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-        .setQuery(QueryBuilders.termQuery("optin", true))
-        .setFrom(offset)
-        .setSize(size)
-        .execute()
-        .actionGet();
+  private List<Subscriber> parseSearchResponse(SearchResponse response) {
     List<Subscriber> subscribers = new LinkedList<>();
-    for (SearchHit hit : resp.getHits()) {
+    for (SearchHit hit : response.getHits()) {
       subscribers.add(gson.fromJson(hit.getSourceAsString(), Subscriber.class));
     }
     return subscribers;

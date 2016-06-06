@@ -10,6 +10,8 @@ import com.google.inject.Inject;
 import org.clebi.subscribers.daos.SubscriberDao;
 import org.clebi.subscribers.daos.exceptions.DaoException;
 import org.clebi.subscribers.model.ErrorResponse;
+import org.clebi.subscribers.model.SearchFilter;
+import org.clebi.subscribers.model.SearchRequest;
 import org.clebi.subscribers.model.Subscriber;
 import org.clebi.subscribers.model.serialize.JsonFactory;
 import org.clebi.subscribers.transformers.JsonResponseTransformer;
@@ -17,6 +19,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class SubscriberController {
@@ -47,14 +50,15 @@ public class SubscriberController {
     get("/user/list/", ((request, response) -> {
       int size = Integer.parseInt(request.queryParams("size"));
       int offset = Integer.parseInt(request.queryParams("offset"));
-      return subscriberDao.list(size, offset);
+      return subscriberDao.search(size, offset, new LinkedList<>());
     }));
 
-    get("/user/search/optins", ((request, response) -> {
-      int size = Integer.parseInt(request.queryParams("size"));
-      int offset = Integer.parseInt(request.queryParams("offset"));
-      return subscriberDao.listOptins(size, offset);
-    }), new JsonResponseTransformer());
+    post("/user/search/", (request, response) -> {
+      SearchRequest searchRequest = gson.fromJson(request.body(), SearchRequest.class);
+      System.out.println(searchRequest);
+      List<SearchFilter> filters = searchRequest.getPrimaryFilters();
+      return subscriberDao.search(searchRequest.getSize(), searchRequest.getOffset(), filters);
+    });
 
     exception(NumberFormatException.class, (exception, request, response) -> {
       response.status(HttpStatus.BAD_REQUEST_400);

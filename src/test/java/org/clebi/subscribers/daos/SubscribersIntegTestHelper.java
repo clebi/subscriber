@@ -39,6 +39,16 @@ public class SubscribersIntegTestHelper {
     node = NodeBuilder.nodeBuilder().settings(settings).local(true).node();
   }
 
+  protected static Client getClient() {
+    return node.client();
+  }
+
+  protected static void refreshIndices() {
+    node.client().admin().indices()
+        .refresh(new RefreshRequest(SubscriberDaoImpl.INDEX_NAME))
+        .actionGet();
+  }
+
   /**
    * Initialize elasticsearch index for tests.
    */
@@ -52,49 +62,48 @@ public class SubscribersIntegTestHelper {
     }
   }
 
-  protected static Client getClient() {
-    return node.client();
-  }
-
   protected Map<String, Subscriber> indexTestSubscibers() {
     final Map<String, Subscriber> subscribers = new HashMap<>();
-    final String emailOptin1 = "test_optin_1@test.com";
-    final String emailOptin2 = "test_optin_2@test.com";
-    final String emailNonOptin = "test_non_optin_1@test.com";
+    final String emailOptinActive = "optin_active_0@test.com";
+    final String emailOptinNonActive = "optin_non-active_0@test.com";
+    final String emailNonOptinActive = "non-optin-active_0@test.com";
+    final String emailNonOptinNonActiv = "non-optin-non-active_0@test.com";
     subscribers.put(
-        emailOptin1,
+        emailOptinActive,
         new Subscriber(
             true,
             true,
-            new Email(emailOptin1),
+            new Email(emailOptinActive),
             ZonedDateTime.now(ZoneOffset.UTC),
             generateTestFields()));
     subscribers.put(
-        emailOptin2,
+        emailOptinNonActive,
         new Subscriber(
             true,
             false,
-            new Email(emailOptin2),
+            new Email(emailOptinNonActive),
             ZonedDateTime.now(ZoneOffset.UTC),
             generateTestFields()));
     subscribers.put(
-        emailNonOptin,
+        emailNonOptinActive,
         new Subscriber(
             false,
             true,
-            new Email(emailNonOptin),
+            new Email(emailNonOptinActive),
+            ZonedDateTime.now(ZoneOffset.UTC),
+            generateTestFields()));
+    subscribers.put(
+        emailNonOptinNonActiv,
+        new Subscriber(
+            false,
+            false,
+            new Email(emailNonOptinNonActiv),
             ZonedDateTime.now(ZoneOffset.UTC),
             generateTestFields()));
     for (Map.Entry<String, Subscriber> entry : subscribers.entrySet()) {
       indexSubsciber(entry.getValue());
     }
     return subscribers;
-  }
-
-  protected static void refreshIndices() {
-    node.client().admin().indices()
-        .refresh(new RefreshRequest(SubscriberDaoImpl.INDEX_NAME))
-        .actionGet();
   }
 
   protected void indexSubsciber(Subscriber subscriber) {

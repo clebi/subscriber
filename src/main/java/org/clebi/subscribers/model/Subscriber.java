@@ -15,8 +15,12 @@ public class Subscriber {
   private boolean optin;
   private boolean active;
   private Email email;
-  private ZonedDateTime dateSubscriber = ZonedDateTime.now(ZoneOffset.UTC);
+  private ZonedDateTime dateSubscriber;
   private Map<String, Object> fields = new HashMap<>();
+
+  public Subscriber() {
+    dateSubscriber = ZonedDateTime.now(ZoneOffset.UTC);
+  }
 
   public boolean isValid() {
     return email != null && email.isValid();
