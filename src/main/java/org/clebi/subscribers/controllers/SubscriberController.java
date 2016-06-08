@@ -1,7 +1,9 @@
 package org.clebi.subscribers.controllers;
 
+import static spark.Spark.before;
 import static spark.Spark.exception;
 import static spark.Spark.get;
+import static spark.Spark.halt;
 import static spark.Spark.post;
 
 import com.google.gson.Gson;
@@ -14,10 +16,12 @@ import org.clebi.subscribers.model.SearchFilter;
 import org.clebi.subscribers.model.SearchRequest;
 import org.clebi.subscribers.model.Subscriber;
 import org.clebi.subscribers.model.serialize.JsonFactory;
+import org.clebi.subscribers.modules.annotations.OauthFilter;
 import org.clebi.subscribers.transformers.JsonResponseTransformer;
 import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spark.Filter;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -32,9 +36,11 @@ public class SubscriberController {
    * Initialize subscriber controller.
    */
   @Inject
-  public SubscriberController(SubscriberDao subscriberDao) {
+  public SubscriberController(SubscriberDao subscriberDao, @OauthFilter Filter filter) {
     this.subscriberDao = subscriberDao;
     final Gson gson = JsonFactory.getGson();
+
+    before(filter);
 
     get("/user/:userEmail", (request, response) -> {
       Subscriber subscriber = subscriberDao.getSubscriber(request.params(":userEmail"));

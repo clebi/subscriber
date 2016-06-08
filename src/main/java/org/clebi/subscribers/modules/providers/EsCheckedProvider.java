@@ -1,4 +1,4 @@
-package org.clebi.subscribers.providers;
+package org.clebi.subscribers.modules.providers;
 
 import com.google.inject.throwingproviders.CheckedProvider;
 

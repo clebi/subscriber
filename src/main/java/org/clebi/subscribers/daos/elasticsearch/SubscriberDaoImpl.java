@@ -9,7 +9,7 @@ import org.clebi.subscribers.daos.exceptions.ValidationException;
 import org.clebi.subscribers.model.SearchFilter;
 import org.clebi.subscribers.model.Subscriber;
 import org.clebi.subscribers.model.serialize.JsonFactory;
-import org.clebi.subscribers.providers.EsCheckedProvider;
+import org.clebi.subscribers.modules.providers.EsCheckedProvider;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;

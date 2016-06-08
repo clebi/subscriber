@@ -9,7 +9,7 @@ import org.clebi.subscribers.daos.SubscriberDao;
 import org.clebi.subscribers.daos.elasticsearch.SubscriberDaoImpl;
 import org.clebi.subscribers.model.config.EsConfiguration;
 import org.clebi.subscribers.modules.exceptions.ConfigurationException;
-import org.clebi.subscribers.providers.EsCheckedProvider;
+import org.clebi.subscribers.modules.providers.EsCheckedProvider;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
