@@ -27,6 +27,11 @@
         <property name="eachLine" value="true"/>
     </module>
 
+    <module name="RegexpHeader">
+        <property name="headerFile" value="config/checkstyle/project.header"/>
+        <property name="fileExtensions" value="java"/>
+    </module>
+
     <module name="TreeWalker">
         <module name="OuterTypeFilename"/>
         <module name="IllegalTokenText">
