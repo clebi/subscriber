@@ -20,6 +20,8 @@ import static org.hamcrest.Matchers.is;
 import org.apache.cxf.common.i18n.UncheckedException;
 import org.clebi.subscribers.configuration.AuthServer;
 import org.clebi.subscribers.configuration.GlobalConfig;
+import org.clebi.subscribers.configuration.Projecter;
+import org.clebi.subscribers.configuration.YamlGlobalConfig;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -73,6 +75,10 @@ public class AuthorizationFilterTest {
     return stubBuilder;
   }
 
+  private GlobalConfig getGlobalConfig() {
+    return new YamlGlobalConfig(new AuthServer(URL_WS_TEST, WS_USERNAME, WS_PASSORD), null);
+  }
+
   private Client getClientStub(Invocation.Builder stubBuilder, String url) {
     Client stubClient = Mockito.mock(Client.class);
     WebTarget stubTarget = Mockito.mock(WebTarget.class);
@@ -92,7 +98,7 @@ public class AuthorizationFilterTest {
 
     AuthorizationFilter filter = new AuthorizationFilter(
         null,
-        () -> () -> new AuthServer(URL_WS_TEST, WS_USERNAME, WS_PASSORD));
+        this::getGlobalConfig);
     filter.handle(stubRequest, stubResponse);
   }
 
@@ -109,7 +115,7 @@ public class AuthorizationFilterTest {
             getUnauthorizedResponseBuilder(),
             URL_WS_TEST
         ),
-        () -> () -> new AuthServer(URL_WS_TEST, WS_USERNAME, WS_PASSORD));
+        this::getGlobalConfig);
     filter.handle(stubRequest, stubResponse);
   }
 
@@ -134,7 +140,7 @@ public class AuthorizationFilterTest {
             ),
             URL_WS_TEST
         ),
-        () -> () -> new AuthServer(URL_WS_TEST, WS_USERNAME, WS_PASSORD));
+        this::getGlobalConfig);
     filter.handle(stubRequest, stubResponse);
   }
 
@@ -157,7 +163,7 @@ public class AuthorizationFilterTest {
             ),
             URL_WS_TEST
         ),
-        () -> () -> new AuthServer(URL_WS_TEST, WS_USERNAME, WS_PASSORD));
+        this::getGlobalConfig);
     filter.handle(stubRequest, stubResponse);
   }
 

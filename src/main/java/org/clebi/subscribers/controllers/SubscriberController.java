@@ -18,6 +18,7 @@ import static spark.Spark.after;
 import static spark.Spark.before;
 import static spark.Spark.exception;
 import static spark.Spark.get;
+import static spark.Spark.halt;
 import static spark.Spark.post;
 
 import com.google.gson.Gson;
@@ -31,6 +32,7 @@ import org.clebi.subscribers.model.SearchRequest;
 import org.clebi.subscribers.model.Subscriber;
 import org.clebi.subscribers.model.serialize.JsonFactory;
 import org.clebi.subscribers.modules.annotations.OauthFilter;
+import org.clebi.subscribers.services.ProjectService;
 import org.clebi.subscribers.transformers.JsonResponseTransformer;
 import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
@@ -45,16 +47,28 @@ public class SubscriberController {
   private static final Logger logger = LoggerFactory.getLogger(SubscriberController.class);
 
   private SubscriberDao subscriberDao;
+  private ProjectService projectService;
 
   /**
    * Initialize subscriber controller.
    */
   @Inject
-  public SubscriberController(SubscriberDao subscriberDao, @OauthFilter Filter filter) {
+  public SubscriberController(SubscriberDao subscriberDao, @OauthFilter Filter filter, ProjectService projectService) {
     this.subscriberDao = subscriberDao;
+    this.projectService = projectService;
     final Gson gson = JsonFactory.getGson();
 
     before(filter);
+    before("/:project/*", ((request, response) -> {
+      String project = request.params(":project");
+      boolean isMember = projectService.isMember(project, request.headers("Authorization"));
+      if (!isMember) {
+        halt(
+            HttpStatus.FORBIDDEN_403,
+            gson.toJson(new ErrorResponse("auth_error", "you are not a member of project " + project))
+        );
+      }
+    }));
 
     get("/:project/:userEmail", (request, response) -> {
       String project = request.params(":project");

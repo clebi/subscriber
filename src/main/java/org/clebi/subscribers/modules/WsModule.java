@@ -18,12 +18,16 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
+import org.clebi.subscribers.services.ProjectService;
+import org.clebi.subscribers.services.ProjecterService;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 
 public class WsModule extends AbstractModule {
   @Override
   protected void configure() {
+    bind(ProjectService.class).to(ProjecterService.class);
   }
 
   @Provides
