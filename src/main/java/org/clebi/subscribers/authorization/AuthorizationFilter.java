@@ -57,11 +57,12 @@ public class AuthorizationFilter implements Filter {
     Form form = new Form();
     form.param("token", token);
     try {
-      AuthResponse resp = wsClient.target(urlAuthServer)
+      AuthResponse authResponse = wsClient.target(urlAuthServer)
           .request(MediaType.APPLICATION_JSON_TYPE)
           .header(AUTHORIZATION_HEADER, basicAuthHeader)
           .post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE), AuthResponse.class);
-      if (!resp.isActive()) {
+      request.attribute("authorization", authResponse);
+      if (!authResponse.isActive()) {
         halt(401, gson.toJson(new ErrorResponse("auth_error", "token not active")));
       }
     } catch (NotAuthorizedException exc) {

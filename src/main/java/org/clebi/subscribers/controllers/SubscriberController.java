@@ -1,5 +1,6 @@
 package org.clebi.subscribers.controllers;
 
+import static spark.Spark.after;
 import static spark.Spark.before;
 import static spark.Spark.exception;
 import static spark.Spark.get;
@@ -42,29 +43,33 @@ public class SubscriberController {
 
     before(filter);
 
-    get("/user/:userEmail", (request, response) -> {
-      Subscriber subscriber = subscriberDao.getSubscriber(request.params(":userEmail"));
+    get("/:project/:userEmail", (request, response) -> {
+      String project = request.params(":project");
+      Subscriber subscriber = subscriberDao.getSubscriber(project, request.params(":userEmail"));
       return subscriber;
     }, new JsonResponseTransformer());
 
-    post("/user/add/", ((request, response) -> {
+    post("/:project/add/", ((request, response) -> {
+      String project = request.params(":project");
       Subscriber subscriber = gson.fromJson(request.body(), Subscriber.class);
-      subscriberDao.addSubscriber(subscriber);
+      subscriberDao.addSubscriber(project, subscriber);
       return subscriber;
     }), new JsonResponseTransformer());
 
-    get("/user/list/", ((request, response) -> {
+    get("/:project/list/", ((request, response) -> {
+      String project = request.params(":project");
       int size = Integer.parseInt(request.queryParams("size"));
       int offset = Integer.parseInt(request.queryParams("offset"));
-      return subscriberDao.search(size, offset, new LinkedList<>());
-    }));
+      return subscriberDao.search(project, size, offset, new LinkedList<>());
+    }), new JsonResponseTransformer());
 
-    post("/user/search/", (request, response) -> {
+    post("/:project/search/", (request, response) -> {
+      String project = request.params(":project");
       SearchRequest searchRequest = gson.fromJson(request.body(), SearchRequest.class);
       System.out.println(searchRequest);
       List<SearchFilter> filters = searchRequest.getPrimaryFilters();
-      return subscriberDao.search(searchRequest.getSize(), searchRequest.getOffset(), filters);
-    });
+      return subscriberDao.search(project, searchRequest.getSize(), searchRequest.getOffset(), filters);
+    }, new JsonResponseTransformer());
 
     exception(NumberFormatException.class, (exception, request, response) -> {
       response.status(HttpStatus.BAD_REQUEST_400);
@@ -82,6 +87,10 @@ public class SubscriberController {
       response.status(HttpStatus.INTERNAL_SERVER_ERROR_500);
       response.body(gson.toJson(new ErrorResponse("error", "unknown error")));
     });
+
+    after(((request, response) -> {
+      response.type("application/json");
+    }));
   }
 
 }

@@ -43,9 +43,9 @@ public class SubscribersIntegTestHelper {
     return node.client();
   }
 
-  protected static void refreshIndices() {
+  protected static void refreshIndices(String index) {
     node.client().admin().indices()
-        .refresh(new RefreshRequest(SubscriberDaoImpl.INDEX_NAME))
+        .refresh(new RefreshRequest(index))
         .actionGet();
   }
 
@@ -62,7 +62,7 @@ public class SubscribersIntegTestHelper {
     }
   }
 
-  protected Map<String, Subscriber> indexTestSubscibers() {
+  protected Map<String, Subscriber> indexTestSubscibers(String index) {
     final Map<String, Subscriber> subscribers = new HashMap<>();
     final String emailOptinActive = "optin_active_0@test.com";
     final String emailOptinNonActive = "optin_non-active_0@test.com";
@@ -101,14 +101,14 @@ public class SubscribersIntegTestHelper {
             ZonedDateTime.now(ZoneOffset.UTC),
             generateTestFields()));
     for (Map.Entry<String, Subscriber> entry : subscribers.entrySet()) {
-      indexSubsciber(entry.getValue());
+      indexSubsciber(index, entry.getValue());
     }
     return subscribers;
   }
 
-  protected void indexSubsciber(Subscriber subscriber) {
+  protected void indexSubsciber(String index, Subscriber subscriber) {
     node.client()
-        .prepareIndex(SubscriberDaoImpl.INDEX_NAME, SubscriberDaoImpl.DOCUMENT_NAME)
+        .prepareIndex(index, SubscriberDaoImpl.DOCUMENT_NAME)
         .setId(subscriber.getEmail().toString())
         .setSource(JsonFactory.getGson().toJson(subscriber))
         .get();

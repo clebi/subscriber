@@ -15,7 +15,7 @@ public interface SubscriberDao {
    * @param subscriber the subscriber to add
    * @throws ValidationException subscriber data are not valid
    */
-  void addSubscriber(Subscriber subscriber) throws ValidationException;
+  void addSubscriber(String project, Subscriber subscriber) throws ValidationException;
 
   /**
    * Get a subscriber by email.
@@ -23,7 +23,7 @@ public interface SubscriberDao {
    * @param email email of the subscriber
    * @return the subscriber
    */
-  Subscriber getSubscriber(String email) throws NotFoundException;
+  Subscriber getSubscriber(String project, String email) throws NotFoundException;
 
   /**
    * Search for subscribers.
@@ -33,6 +33,6 @@ public interface SubscriberDao {
    * @param filters the list of filters for the search
    * @return the list of matched users
    */
-  List<Subscriber> search(int size, int offset, List<SearchFilter> filters);
+  List<Subscriber> search(String project, int size, int offset, List<SearchFilter> filters);
 
 }

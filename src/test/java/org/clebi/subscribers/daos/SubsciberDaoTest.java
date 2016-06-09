@@ -12,10 +12,13 @@ import java.util.HashMap;
 
 public class SubsciberDaoTest {
 
+  private static final String TEST_PROJECT = "test_unit_project";
+
   @Test(expected = ValidationException.class)
   public void testAddNotValidSubscriber() throws Exception {
     SubscriberDao dao = new SubscriberDaoImpl(() -> null);
     dao.addSubscriber(
+        TEST_PROJECT,
         new Subscriber(
             true,
             true,

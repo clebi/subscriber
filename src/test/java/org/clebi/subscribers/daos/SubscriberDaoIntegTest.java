@@ -19,6 +19,12 @@ import java.util.Map;
 
 public class SubscriberDaoIntegTest extends SubscribersIntegTestHelper {
 
+  private static final String TEST_GET_USER_PROJECT = "test_integ_get_user_project";
+  private static final String TEST_ADD_USER_PROJECT = "test_integ_add_user_project";
+  private static final String TEST_SEARCH_OPTINS_PROJECT = "test_integ_search_optins_project";
+  private static final String TEST_SEARCH_ACTIVES_PROJECT = "test_integ_search_actives_project";
+  private static final String TEST_SEARCH_OPTINS_ACTIVES_PROJECT = "test_integ_optins_actives_project";
+  private static final String TEST_LIST_ALL_PROJECT = "test_integ_list_all_project";
   private static final String TEST_EMAIL = "test@test.com";
 
   @Test
@@ -30,9 +36,9 @@ public class SubscriberDaoIntegTest extends SubscribersIntegTestHelper {
         new Email(TEST_EMAIL),
         ZonedDateTime.now(ZoneOffset.UTC),
         fields);
-    indexSubsciber(subscriber);
+    indexSubsciber(TEST_GET_USER_PROJECT, subscriber);
     SubscriberDao dao = new SubscriberDaoImpl(SubscribersIntegTestHelper::getClient);
-    Subscriber getSubscriber = dao.getSubscriber(subscriber.getEmail().toString());
+    Subscriber getSubscriber = dao.getSubscriber(TEST_GET_USER_PROJECT, subscriber.getEmail().toString());
     assertSubscriber(subscriber, getSubscriber);
   }
 
@@ -46,9 +52,9 @@ public class SubscriberDaoIntegTest extends SubscribersIntegTestHelper {
         ZonedDateTime.now(ZoneOffset.UTC),
         fields);
     SubscriberDao dao = new SubscriberDaoImpl(SubscribersIntegTestHelper::getClient);
-    dao.addSubscriber(subscriber);
+    dao.addSubscriber(TEST_ADD_USER_PROJECT, subscriber);
     GetResponse resp = getClient()
-        .prepareGet(SubscriberDaoImpl.INDEX_NAME, SubscriberDaoImpl.DOCUMENT_NAME, TEST_EMAIL)
+        .prepareGet(TEST_ADD_USER_PROJECT, SubscriberDaoImpl.DOCUMENT_NAME, TEST_EMAIL)
         .get();
     Subscriber getSubscriber = JsonFactory.getGson().fromJson(
         resp.getSourceAsString(),
@@ -59,13 +65,13 @@ public class SubscriberDaoIntegTest extends SubscribersIntegTestHelper {
   @Test
   public void testSearchOptins() throws Exception {
     final SubscriberDao dao = new SubscriberDaoImpl(SubscribersIntegTestHelper::getClient);
-    final Map<String, Subscriber> subscribers = indexTestSubscibers();
-    refreshIndices();
+    final Map<String, Subscriber> subscribers = indexTestSubscibers(TEST_SEARCH_OPTINS_PROJECT);
+    refreshIndices(TEST_SEARCH_OPTINS_PROJECT);
     List<SearchFilter> filters = new LinkedList<>();
     List<Object> values = new ArrayList<>();
     values.add(true);
     filters.add(new SearchFilter("optin", FilterOperand.EQUAL, values));
-    final List<Subscriber> listSubscribers = dao.search(5, 0, filters);
+    final List<Subscriber> listSubscribers = dao.search(TEST_SEARCH_OPTINS_PROJECT, 5, 0, filters);
     Assert.assertEquals(2, listSubscribers.size());
     for (Subscriber subscriber : listSubscribers) {
       Subscriber expectedSubscriber = subscribers.get(subscriber.getEmail().toString());
@@ -76,13 +82,13 @@ public class SubscriberDaoIntegTest extends SubscribersIntegTestHelper {
   @Test
   public void testSearchActives() throws Exception {
     final SubscriberDao dao = new SubscriberDaoImpl(SubscribersIntegTestHelper::getClient);
-    final Map<String, Subscriber> subscribers = indexTestSubscibers();
-    refreshIndices();
+    final Map<String, Subscriber> subscribers = indexTestSubscibers(TEST_SEARCH_ACTIVES_PROJECT);
+    refreshIndices(TEST_SEARCH_ACTIVES_PROJECT);
     List<SearchFilter> filters = new LinkedList<>();
     List<Object> values = new ArrayList<>();
     values.add(true);
     filters.add(new SearchFilter("active", FilterOperand.EQUAL, values));
-    final List<Subscriber> listSubscribers = dao.search(5, 0, filters);
+    final List<Subscriber> listSubscribers = dao.search(TEST_SEARCH_ACTIVES_PROJECT, 5, 0, filters);
     Assert.assertEquals(2, listSubscribers.size());
     for (Subscriber subscriber : listSubscribers) {
       Subscriber expectedSubscriber = subscribers.get(subscriber.getEmail().toString());
@@ -93,14 +99,14 @@ public class SubscriberDaoIntegTest extends SubscribersIntegTestHelper {
   @Test
   public void testSearchOptinsActives() throws Exception {
     final SubscriberDao dao = new SubscriberDaoImpl(SubscribersIntegTestHelper::getClient);
-    final Map<String, Subscriber> subscribers = indexTestSubscibers();
-    refreshIndices();
+    final Map<String, Subscriber> subscribers = indexTestSubscibers(TEST_SEARCH_OPTINS_ACTIVES_PROJECT);
+    refreshIndices(TEST_SEARCH_OPTINS_ACTIVES_PROJECT);
     List<SearchFilter> filters = new LinkedList<>();
     List<Object> values = new ArrayList<>();
     values.add(true);
     filters.add(new SearchFilter("active", FilterOperand.EQUAL, values));
     filters.add(new SearchFilter("optin", FilterOperand.EQUAL, values));
-    final List<Subscriber> listSubscribers = dao.search(5, 0, filters);
+    final List<Subscriber> listSubscribers = dao.search(TEST_SEARCH_OPTINS_ACTIVES_PROJECT, 5, 0, filters);
     Assert.assertEquals(1, listSubscribers.size());
     for (Subscriber subscriber : listSubscribers) {
       Subscriber expectedSubscriber = subscribers.get(subscriber.getEmail().toString());
@@ -111,9 +117,9 @@ public class SubscriberDaoIntegTest extends SubscribersIntegTestHelper {
   @Test
   public void testListAll() throws Exception {
     final SubscriberDao dao = new SubscriberDaoImpl(SubscribersIntegTestHelper::getClient);
-    final Map<String, Subscriber> subscribers = indexTestSubscibers();
-    refreshIndices();
-    final List<Subscriber> listSubscribers = dao.search(5, 0, new LinkedList<>());
+    final Map<String, Subscriber> subscribers = indexTestSubscibers(TEST_LIST_ALL_PROJECT);
+    refreshIndices(TEST_LIST_ALL_PROJECT);
+    final List<Subscriber> listSubscribers = dao.search(TEST_LIST_ALL_PROJECT, 5, 0, new LinkedList<>());
     Assert.assertEquals(subscribers.size(), listSubscribers.size());
     for (Subscriber subscriber : listSubscribers) {
       Subscriber expectedSubscriber = subscribers.get(subscriber.getEmail().toString());

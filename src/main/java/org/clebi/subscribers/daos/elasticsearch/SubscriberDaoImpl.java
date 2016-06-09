@@ -37,20 +37,19 @@ public class SubscriberDaoImpl implements SubscriberDao {
   }
 
   @Override
-  public void addSubscriber(Subscriber subscriber) throws ValidationException {
+  public void addSubscriber(String project, Subscriber subscriber) throws ValidationException {
     if (!subscriber.isValid()) {
       throw new ValidationException("unable to validate subscriber model");
     }
-    System.out.println(gson.toJson(subscriber));
-    client.prepareIndex(INDEX_NAME, DOCUMENT_NAME)
+    client.prepareIndex(project, DOCUMENT_NAME)
         .setSource(gson.toJson(subscriber))
         .setId(subscriber.getEmail().toString())
         .get();
   }
 
   @Override
-  public Subscriber getSubscriber(String email) throws NotFoundException {
-    GetResponse resp = client.prepareGet("subscribers", "subscriber", email).get();
+  public Subscriber getSubscriber(String project, String email) throws NotFoundException {
+    GetResponse resp = client.prepareGet(project, "subscriber", email).get();
     Subscriber subscriber = gson.fromJson(resp.getSourceAsString(), Subscriber.class);
     if (subscriber == null || !subscriber.isValid()) {
       throw new NotFoundException(String.format(ERROR_GET_NOT_FOUND, email));
@@ -59,13 +58,13 @@ public class SubscriberDaoImpl implements SubscriberDao {
   }
 
   @Override
-  public List<Subscriber> search(int size, int offset, List<SearchFilter> filters) {
+  public List<Subscriber> search(String project, int size, int offset, List<SearchFilter> filters) {
     BoolQueryBuilder builder = new BoolQueryBuilder();
     for (SearchFilter filter : filters) {
       System.out.println(filter);
       builder.must(QueryBuilders.termQuery(filter.getFieldName(), filter.getValues().get(0)));
     }
-    SearchResponse resp = client.prepareSearch(INDEX_NAME)
+    SearchResponse resp = client.prepareSearch(project)
         .setTypes(DOCUMENT_NAME)
         .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
         .setQuery(builder)
