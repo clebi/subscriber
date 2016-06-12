@@ -19,8 +19,10 @@ import com.google.inject.Inject;
 import org.clebi.subscribers.configuration.GlobalConfig;
 import org.clebi.subscribers.modules.exceptions.ConfigurationException;
 import org.clebi.subscribers.modules.providers.ConfigCheckedProvider;
+import org.clebi.subscribers.services.exceptions.ProjectServiceException;
 
 import java.util.HashMap;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.MediaType;
 
@@ -43,11 +45,15 @@ public class ProjecterService implements ProjectService {
   }
 
   @Override
-  public boolean isMember(String projectName, String token) {
-    HashMap resp = wsClient.target(url).path("project/" + projectName + "/is-member/")
-        .request(MediaType.APPLICATION_JSON_TYPE)
-        .header("Authorization", token)
-        .get(HashMap.class);
-    return (boolean) resp.get("isMember");
+  public boolean isMember(String projectName, String token) throws ProjectServiceException {
+    try {
+      HashMap resp = wsClient.target(url).path("project/" + projectName + "/is-member/")
+          .request(MediaType.APPLICATION_JSON_TYPE)
+          .header("Authorization", token)
+          .get(HashMap.class);
+      return (boolean) resp.get("isMember");
+    } catch (NotFoundException exc) {
+      throw new ProjectServiceException("unable to find project " + projectName);
+    }
   }
 }

@@ -33,6 +33,7 @@ import org.clebi.subscribers.model.Subscriber;
 import org.clebi.subscribers.model.serialize.JsonFactory;
 import org.clebi.subscribers.modules.annotations.OauthFilter;
 import org.clebi.subscribers.services.ProjectService;
+import org.clebi.subscribers.services.exceptions.ServiceException;
 import org.clebi.subscribers.transformers.JsonResponseTransformer;
 import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
@@ -97,6 +98,11 @@ public class SubscriberController {
       List<SearchFilter> filters = searchRequest.getPrimaryFilters();
       return subscriberDao.search(project, searchRequest.getSize(), searchRequest.getOffset(), filters);
     }, new JsonResponseTransformer());
+
+    exception(ServiceException.class, ((exception, request, response) -> {
+      response.status(HttpStatus.BAD_REQUEST_400);
+      response.body(gson.toJson(new ErrorResponse("error", exception.getMessage())));
+    }));
 
     exception(NumberFormatException.class, (exception, request, response) -> {
       response.status(HttpStatus.BAD_REQUEST_400);
