@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.clebi.subscribers.services;
+package org.clebi.subscribers.model;
 
-import org.clebi.subscribers.model.Project;
-import org.clebi.subscribers.services.exceptions.ProjectServiceException;
+import lombok.Data;
 
-public interface ProjectService {
+@Data
+public class Field {
 
-  boolean isMember(String projectName, String token) throws ProjectServiceException;
-
-  Project getProject(String projectName, String token) throws ProjectServiceException;
+  private String name;
+  private Object value;
 
 }

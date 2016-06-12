@@ -21,12 +21,22 @@ import org.clebi.subscribers.controllers.SubscriberController;
 import org.clebi.subscribers.modules.ConfigModule;
 import org.clebi.subscribers.modules.DaoModule;
 import org.clebi.subscribers.modules.FilterModule;
+import org.clebi.subscribers.modules.ServiceModule;
 import org.clebi.subscribers.modules.WsModule;
 
 public class App {
 
+  /**
+   * Main function.
+   * @param args program arguments
+   */
   public static void main(String[] args) {
-    Injector injector = Guice.createInjector(new DaoModule(), new WsModule(), new FilterModule(), new ConfigModule());
+    Injector injector = Guice.createInjector(
+        new DaoModule(),
+        new WsModule(),
+        new FilterModule(),
+        new ConfigModule(),
+        new ServiceModule());
     final SubscriberController controller = injector.getInstance(SubscriberController.class);
   }
 }

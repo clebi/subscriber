@@ -12,15 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.clebi.subscribers.services;
+package org.clebi.subscribers.model;
 
-import org.clebi.subscribers.model.Project;
-import org.clebi.subscribers.services.exceptions.ProjectServiceException;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-public interface ProjectService {
+import lombok.Data;
 
-  boolean isMember(String projectName, String token) throws ProjectServiceException;
+import java.util.List;
+import java.util.Map;
 
-  Project getProject(String projectName, String token) throws ProjectServiceException;
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Project {
+
+  private String name;
+  private List<String> members;
+  private Map<String, String> fields;
 
 }

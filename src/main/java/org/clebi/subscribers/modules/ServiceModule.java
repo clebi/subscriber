@@ -12,15 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.clebi.subscribers.services;
+package org.clebi.subscribers.modules;
 
-import org.clebi.subscribers.model.Project;
-import org.clebi.subscribers.services.exceptions.ProjectServiceException;
+import com.google.inject.AbstractModule;
 
-public interface ProjectService {
+import org.clebi.subscribers.services.ISubscriberService;
+import org.clebi.subscribers.services.ProjectService;
+import org.clebi.subscribers.services.ProjecterService;
+import org.clebi.subscribers.services.SubscriberService;
 
-  boolean isMember(String projectName, String token) throws ProjectServiceException;
-
-  Project getProject(String projectName, String token) throws ProjectServiceException;
-
+public class ServiceModule extends AbstractModule {
+  @Override
+  protected void configure() {
+    bind(ProjectService.class).to(ProjecterService.class);
+    bind(ISubscriberService.class).to(SubscriberService.class);
+  }
 }

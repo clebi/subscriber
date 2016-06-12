@@ -27,12 +27,15 @@ import com.google.inject.Inject;
 import org.clebi.subscribers.daos.SubscriberDao;
 import org.clebi.subscribers.daos.exceptions.DaoException;
 import org.clebi.subscribers.model.ErrorResponse;
+import org.clebi.subscribers.model.Project;
 import org.clebi.subscribers.model.SearchFilter;
 import org.clebi.subscribers.model.SearchRequest;
 import org.clebi.subscribers.model.Subscriber;
 import org.clebi.subscribers.model.serialize.JsonFactory;
 import org.clebi.subscribers.modules.annotations.OauthFilter;
+import org.clebi.subscribers.services.ISubscriberService;
 import org.clebi.subscribers.services.ProjectService;
+import org.clebi.subscribers.services.SubscriberService;
 import org.clebi.subscribers.services.exceptions.ServiceException;
 import org.clebi.subscribers.transformers.JsonResponseTransformer;
 import org.eclipse.jetty.http.HttpStatus;
@@ -42,6 +45,7 @@ import spark.Filter;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class SubscriberController {
 
@@ -54,7 +58,11 @@ public class SubscriberController {
    * Initialize subscriber controller.
    */
   @Inject
-  public SubscriberController(SubscriberDao subscriberDao, @OauthFilter Filter filter, ProjectService projectService) {
+  public SubscriberController(
+      SubscriberDao subscriberDao,
+      @OauthFilter Filter filter,
+      ProjectService projectService,
+      ISubscriberService subscriberService) {
     this.subscriberDao = subscriberDao;
     this.projectService = projectService;
     final Gson gson = JsonFactory.getGson();
@@ -78,9 +86,9 @@ public class SubscriberController {
     }, new JsonResponseTransformer());
 
     post("/:project/add/", ((request, response) -> {
-      String project = request.params(":project");
+      String projectName = request.params(":project");
       Subscriber subscriber = gson.fromJson(request.body(), Subscriber.class);
-      subscriberDao.addSubscriber(project, subscriber);
+      subscriberService.addSubscriber(projectName, subscriber, request.headers("Authorization"));
       return subscriber;
     }), new JsonResponseTransformer());
 

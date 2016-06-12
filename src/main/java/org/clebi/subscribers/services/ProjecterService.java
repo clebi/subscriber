@@ -17,6 +17,7 @@ package org.clebi.subscribers.services;
 import com.google.inject.Inject;
 
 import org.clebi.subscribers.configuration.GlobalConfig;
+import org.clebi.subscribers.model.Project;
 import org.clebi.subscribers.modules.exceptions.ConfigurationException;
 import org.clebi.subscribers.modules.providers.ConfigCheckedProvider;
 import org.clebi.subscribers.services.exceptions.ProjectServiceException;
@@ -40,7 +41,6 @@ public class ProjecterService implements ProjectService {
   @Inject
   public ProjecterService(Client wsClient, ConfigCheckedProvider<GlobalConfig> config) throws ConfigurationException {
     this.url = config.get().getProjecter().getUrl();
-    System.out.println(url);
     this.wsClient = wsClient;
   }
 
@@ -55,5 +55,14 @@ public class ProjecterService implements ProjectService {
     } catch (NotFoundException exc) {
       throw new ProjectServiceException("unable to find project " + projectName);
     }
+  }
+
+  @Override
+  public Project getProject(String projectName, String token) throws ProjectServiceException {
+    Project project = wsClient.target(url).path("project/" + projectName + "/")
+        .request(MediaType.APPLICATION_JSON_TYPE)
+        .header("Authorization", token)
+        .get(Project.class);
+    return project;
   }
 }
